@@ -8,19 +8,56 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace DataGridTool
+namespace WindowsFormsApplication1
 {
-    class DataGridUtils
+    class DataGridTool
     {
 
-        private ComboBox cmb = new ComboBox();
+        private static ComboBox cmb = new ComboBox();
+        private static DataGridView dgv = null;
 
+
+        /// <summary>
+        /// 下拉控件触发
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void dataGridView_CurrentCellChanged( object sender,EventArgs e)
+        {
+            cmb.Visible = false;
+            cmb.Width = 0;
+            if (dgv.CurrentCell.ColumnIndex == 1) // 选定出现的列
+            {
+                cmb.Left = dgv.GetCellDisplayRectangle(dgv.CurrentCell.ColumnIndex, dgv.CurrentCell.RowIndex, true).Left;
+                cmb.Top = dgv.GetCellDisplayRectangle(dgv.CurrentCell.ColumnIndex, dgv.CurrentCell.RowIndex, true).Top;
+                cmb.Width = dgv.GetCellDisplayRectangle(dgv.CurrentCell.ColumnIndex, dgv.CurrentCell.RowIndex, true).Width;
+                string content ="";
+                if(dgv.CurrentCell.Value!=null)
+                     content = dgv.CurrentCell.Value.ToString();
+                cmb.Text = content;
+                cmb.Visible = true;
+            }
+            else
+            {
+                cmb.Visible = false;
+                cmb.Width = 0;
+            }
+        }
         /// <summary>
         /// 初始设置gridview特性
         /// </summary>
         /// <param name="dataGridView"></param>
         public static void SetGridView(ref DataGridView dataGridView)
         {
+
+            dgv = dataGridView; // 绑定DataGridView控件
+
+            cmb.Visible = false;
+            cmb.Width = 0;
+            dataGridView.Controls.Add(cmb);
+
+            dataGridView.CurrentCellChanged += new System.EventHandler(dataGridView_CurrentCellChanged);  // 增加触发事件
+  
             // 增加四列
             dataGridView.Columns.Add(" ", " ");
             dataGridView.Columns.Add(" ", " ");
@@ -30,16 +67,14 @@ namespace DataGridTool
             // 增加两行
             dataGridView.Rows.Add();
             dataGridView.Rows.Add();
-            
-      
- 
+
             dataGridView.ColumnHeadersVisible = false;
 
             dataGridView.Rows[0].HeaderCell.Value = "T/℃";
 
             dataGridView.Rows[1].HeaderCell.Value = "系数";
 
-            dataGridView.RowHeadersWidth =100;
+            dataGridView.RowHeadersWidth = 100;
 
             dataGridView.Height = 68;
 
