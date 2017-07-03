@@ -8,17 +8,17 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace WindowsFormsApplication1
+namespace Tools
 {
     class DataGridTool
     {
 
-        private static ComboBox cmb = new ComboBox();
+        private static ComboBox cmb = null;
         private static DataGridView dgv = null;
 
-
+##region 事件响应
         /// <summary>
-        /// 下拉控件触发
+        /// 下拉控件触发,当鼠标点击指定单元格时显示下拉框
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -26,7 +26,7 @@ namespace WindowsFormsApplication1
         {
             cmb.Visible = false;
             cmb.Width = 0;
-            if (dgv.CurrentCell.ColumnIndex == 1) // 选定出现的列
+            if (dgv.CurrentCell.ColumnIndex == 1) // 下拉框出现的单元格（缺少行限制）
             {
                 cmb.Left = dgv.GetCellDisplayRectangle(dgv.CurrentCell.ColumnIndex, dgv.CurrentCell.RowIndex, true).Left;
                 cmb.Top = dgv.GetCellDisplayRectangle(dgv.CurrentCell.ColumnIndex, dgv.CurrentCell.RowIndex, true).Top;
@@ -43,8 +43,29 @@ namespace WindowsFormsApplication1
                 cmb.Width = 0;
             }
         }
+
         /// <summary>
-        /// 初始设置gridview特性
+        /// 下拉框事件，当前选择项变化时更新当前单元格的值
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void combobox_SelectedIndexChanged(object sender,EventArgs e)
+        {
+            dgv.CurrentCell.Value = cmb.SelectedItem.ToString();
+        }
+        /// <summary>
+        /// 下拉框事件，当编辑选择项的内容时更新到当前单元格的值（当前单元格最好可以在该处指定）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void combobox1_TextChanged(object sender,EventArgs e)
+        {
+            dgv.CurrentCell.Value = cmb.Text.ToString();
+        }
+#endregion
+        
+        /// <summary>
+        ///dataGridView的一些初始设置
         /// </summary>
         /// <param name="dataGridView"></param>
         public static void SetGridView(ref DataGridView dataGridView)
@@ -54,7 +75,7 @@ namespace WindowsFormsApplication1
 
             cmb.Visible = false;
             cmb.Width = 0;
-            dataGridView.Controls.Add(cmb);
+            dataGridView.Controls.Add(cmb); // 在dataGridView中注册该下拉框
 
             dataGridView.CurrentCellChanged += new System.EventHandler(dataGridView_CurrentCellChanged);  // 增加触发事件
   
@@ -68,7 +89,8 @@ namespace WindowsFormsApplication1
             dataGridView.Rows.Add();
             dataGridView.Rows.Add();
 
-            dataGridView.ColumnHeadersVisible = false;
+            /* 表格相关属性 */
+            dataGridView.ColumnHeadersVisible = false; // 隐藏列头
 
             dataGridView.Rows[0].HeaderCell.Value = "T/℃";
 
@@ -90,6 +112,8 @@ namespace WindowsFormsApplication1
 
             dataGridView.AllowUserToAddRows = false;
         }
+
+#region dataGridView操作
         /// <summary>
         /// 获得指定行列单元的值
         /// </summary>
@@ -133,7 +157,10 @@ namespace WindowsFormsApplication1
         {
             dataGridView.Columns.Add(" ", " ");
         }
-
+        /// <summary>
+        ///对所有的单元格进行解析，判断是否符合数值要求（不太安全的实现）
+        /// </summary>
+        /// <param name="dataGridView"></param>
         public static bool ParseCellValue(ref DataGridView dataGridView)
         {
            for(int i = 0;i<dataGridView.RowCount;++i)
@@ -158,11 +185,12 @@ namespace WindowsFormsApplication1
                                    return false;
                            }
                        
-                   }
-               }
+                   } // end foreach
+               } // end for
                
-           }
+           } // end for
            return true;
-        }
-    }
+        } // end ParseCellValue(...)
+#endregion
+    } // end DataGridTool
 }
